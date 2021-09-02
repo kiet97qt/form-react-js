@@ -11,7 +11,7 @@ class TaskForm extends Component {
             isAddTaskMode: false
         }
     } 
-
+    
     static getDerivedStateFromProps(nextProps, prevState){
         if(nextProps?.task && (nextProps?.task?.id !== prevState?.id)){
             return {

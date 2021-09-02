@@ -13,7 +13,12 @@ class App extends Component {
     this.state = {
         tasks : [],
         taskEditting: null,
-        isDisplayForm: false
+        isDisplayForm: false,
+        filterName: '',
+        filterStatus : 'all',
+        keyword: '',
+        sortBy : 'name',
+        sortValue : 1 
     }
   } 
 
@@ -113,6 +118,13 @@ class App extends Component {
     this.onShowForm()
   }
 
+  onFilter = (filterName,filterStatus) => {
+    this.setState({
+      filterName: filterName,
+      filterStatus: filterStatus
+    })
+  }
+
   onDeleteItem = (id) => {
     let {tasks} = this.state 
     let newTasks = []
@@ -128,13 +140,60 @@ class App extends Component {
     this.onCloseForm()
   }
 
+  onSearch = (keyword) => {
+    this.setState({
+      keyword: keyword
+    })
+  }
+
+  onSort = (sortBy, sortValue) => {
+    this.setState({
+      sortBy: sortBy,
+      sortValue: sortValue
+    })
+  }
 
   render(){
-    let {tasks, isDisplayForm} = this.state;
+    let {tasks, isDisplayForm, filterName, filterStatus, keyword, sortBy, sortValue} = this.state;
     let eleForm = isDisplayForm ? <TaskForm onCloseForm = {() => this.onCloseForm()} 
                                             onSubmit = {this.onSubmit}
                                             task = {this.state.taskEditting}
                                   ></TaskForm> : ''
+    if(filterName.toLowerCase() !== ''){
+      tasks = tasks.filter((task) => {
+        return task.name.toLowerCase().includes(filterName.toLowerCase())
+      })
+    }
+
+    if(filterStatus !== 'all'){
+      filterStatus = filterStatus === 'active'? true : false 
+      tasks = tasks.filter((task) => {
+        return task.status === filterStatus
+      })
+    }
+
+    tasks = tasks.sort((firstEle,secondEle) => {
+      if(sortBy === 'name') {
+        if(sortValue === 1){
+          return firstEle.name.toLowerCase() > secondEle.name.toLowerCase()? 1 : -1 
+        } else {
+          return firstEle.name.toLowerCase() < secondEle.name.toLowerCase()? 1 : -1
+        }
+      } else {
+        if(sortValue === 1){
+          return firstEle.status > secondEle.status ? -1 : 1
+        } else {
+          return firstEle.status < secondEle.status ? -1 : 1
+        }      
+      }
+    })  
+
+    if(keyword.toLowerCase() !== ''){
+      tasks = tasks.filter((task) => {
+        return task.name.toLowerCase().includes(keyword.toLowerCase())
+      })
+    }
+
     return (
       <div className="container">
         <div className="text-center">
@@ -152,7 +211,7 @@ class App extends Component {
                 <button type="button" className="btn btn-warning ml-5" onClick = {() => this.onClearData()}> 
                     Clear Data
                 </button>
-                <Control></Control>
+                <Control onSearch = {this.onSearch} onSort= {this.onSort} sortBy = {sortBy} sortValue = {sortValue}></Control>
                 <div className="row mt-15">
                     <div className="col-12">
                       <TaskList 
@@ -160,6 +219,7 @@ class App extends Component {
                         onUpdateStatus={this.onUpdateStatus} 
                         onDeleteItem ={this.onDeleteItem}
                         onUpdate = {this.onUpdate}
+                        onFilter = {this.onFilter}
                       ></TaskList>
                     </div>
                 </div>
